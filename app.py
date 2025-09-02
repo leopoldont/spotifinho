@@ -37,11 +37,18 @@ def search():
                             seconds = int(duration_seconds % 60)
                             duration_str = f"{minutes}:{seconds:02d}"
 
+                        thumbnail_url = ''
+                        if 'thumbnails' in entry and entry['thumbnails']:
+                            # Try to get the last (usually highest resolution) thumbnail
+                            thumbnail_url = entry['thumbnails'][-1]['url']
+                        elif 'thumbnail' in entry: # Fallback to single thumbnail if 'thumbnails' list is not present
+                            thumbnail_url = entry['thumbnail']
+
                         results.append({
                             'id': entry['id'],
                             'title': entry['title'],
                             'artist': entry.get('channel', 'Unknown Artist'), # Use channel as artist
-                            'thumbnail': entry.get('thumbnail', ''),
+                            'thumbnail': thumbnail_url,
                             'duration': duration_str
                         })
             return jsonify(results)
