@@ -64,10 +64,11 @@ def stream():
 
     try:
         ydl_opts = {
-            'format': 'bestaudio[ext=m4a]/bestaudio', # Prefer m4a, then any best audio
+            'format': 'bestaudio[ext=m4a]/bestaudio',
             'noplaylist': True,
             'quiet': True,
             'simulate': True, # Don't download, just get info
+            'source_address': '0.0.0.0', # Attempt to force a source address
         }
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(f"https://www.youtube.com/watch?v={video_id}", download=False)
