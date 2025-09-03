@@ -32,11 +32,46 @@ Este documento resume as instruções e o escopo atual do projeto.
 *   **Integração YouTube (Streaming):** Implementação da extração de URLs de streaming de áudio do YouTube usando `yt-dlp` no backend. A reprodução de músicas está funcional no navegador.
 *   **Correção de Bug:** Resolvido o erro de formatação de duração que impedia a busca.
 
-### Melhorias Pendentes (Próximos Passos)
+### Melhorias Realizadas (UI/UX Overhaul)
 
-*   **Interface/Experiência do Usuário:**
-    *   **Imagens das Músicas:** As miniaturas (thumbnails) das músicas não estão sendo carregadas/exibidas corretamente.
-    *   **Delay no Pause:** O botão de pause apresenta um atraso perceptível.
-    *   **Pré-buffer:** Implementar um tempo de pré-buffer antes de iniciar a reprodução para evitar interrupções no streaming.
+*   **Interface/Experiência do Usuário (Concluído):**
+    *   **Novo Tema:** A interface foi redesenhada com um tema escuro moderno, inspirado no Spotify.
+    *   **Player Aprimorado:** Adicionada uma seção "Now Playing" que exibe a arte, título e artista da música atual.
+    *   **Feedback Visual:** A lista de resultados agora indica visualmente qual música está carregando e qual está tocando, melhorando a percepção de responsividade.
+    *   **Correção de Thumbnails:** A exibição de thumbnails foi corrigida e integrada ao novo design.
+
+### Próximos Passos (Pós-Teste)
+
 *   **Deploy:** Preparar o projeto para deploy em uma plataforma como Vercel.
+
+---
+
+## Instrução 3: Especificação de Novas Funcionalidades
+
+**Objetivo:** Definir o escopo para a próxima fase de desenvolvimento, focando em interação do usuário e gerenciamento de músicas.
+
+### Funcionalidades Desejadas
+
+1.  **Interações na Música:**
+    *   **Curtir (`Like`):** Adicionar um ícone de coração (ou similar) em cada música na lista de resultados e no player. O estado "curtido" deve ser visualmente claro.
+    *   **Salvar na Playlist:** Adicionar um ícone para salvar a música em uma playlist.
+        *   **Fase 1:** A música será salva em uma única playlist padrão, chamada "Músicas Curtidas" ou "Minha Playlist".
+        *   **Fase 2 (Futuro):** Desenvolver um sistema para criar e gerenciar múltiplas playlists.
+
+2.  **Navegação e Biblioteca:**
+    *   **Barra de Navegação:** Implementar uma barra de navegação fixa (inferior ou lateral) para acesso rápido às seções principais.
+    *   **Seção Biblioteca:**
+        *   Criar uma nova visualização/página "Biblioteca".
+        *   Inicialmente, esta seção exibirá la playlist de "Músicas Curtidas".
+        *   **Futuro:** A Biblioteca será o local para gerenciar playlists e acessar músicas baixadas.
+
+3.  **Modo Offline (Futuro):**
+    *   **Download de Músicas:** Implementar uma funcionalidade que permita ao usuário baixar músicas para o dispositivo.
+    *   **Acesso Offline:** As músicas baixadas devem estar disponíveis para audição na seção "Biblioteca" mesmo quando o usuário estiver sem conexão com a internet.
+
+### Reflexão sobre a Implementação
+
+*   **Armazenamento de Dados:** Para salvar o estado de "curtidas" e as playlists, precisaremos de uma forma de armazenamento no lado do cliente. O `localStorage` do navegador é a solução mais simples e imediata para isso. Cada música "curtida" ou salva pode ter seu ID do YouTube e metadados armazenados em uma lista no `localStorage`.
+*   **Estrutura da UI:** A introdução de uma barra de navegação e uma nova seção "Biblioteca" exigirá uma refatoração do `index.html` para suportar múltiplas "páginas" ou "visualizações". Podemos gerenciar a visibilidade das seções (Pesquisa, Biblioteca) com JavaScript, sem a necessidade de recarregar a página.
+*   **Modo Offline:** O download de áudio do YouTube para o dispositivo do cliente é tecnicamente complexo e pode violar os termos de serviço do YouTube. Uma abordagem mais viável seria usar Service Workers para cachear os streams de áudio, permitindo a reprodução offline. Isso adiciona uma camada significativa de complexidade, mas é a abordagem correta para uma PWA (Progressive Web App).
 

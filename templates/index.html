@@ -9,14 +9,25 @@
 <body>
     <div class="container">
         <h1>Spotifinho Web</h1>
+
+        <div class="player-container">
+            <div id="playerInfo" class="player-info" style="display: none;">
+                <img id="currentTrackThumbnail" src="" alt="Thumbnail" class="player-thumbnail">
+                <div class="player-track-details">
+                    <h3 id="currentTrackTitle"></h3>
+                    <p id="currentTrackArtist"></p>
+                </div>
+            </div>
+            <audio class="audio-player" id="audioPlayer" controls></audio>
+        </div>
+
         <div class="search-bar">
-            <input type="text" id="searchInput" placeholder="Pesquisar músicas no YouTube...">
+            <input type="text" id="searchInput" placeholder="Pesquisar músicas">
             <button id="searchButton">Buscar</button>
         </div>
         <ul class="results-list" id="resultsList">
             <!-- Resultados da pesquisa serão exibidos aqui -->
         </ul>
-        <audio class="audio-player" id="audioPlayer" controls></audio>
     </div>
     <script src="/static/script.js"></script>
 </body>
