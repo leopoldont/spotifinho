@@ -1,7 +1,7 @@
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     margin: 0;
-    padding: 20px;
+    padding: 20px 20px 80px 20px; /* Added bottom padding */
     background-color: #121212;
     color: #fff;
 }
@@ -101,7 +101,7 @@ h1 {
     align-items: center;
     padding: 12px;
     border-radius: 4px;
-    cursor: pointer;
+    /* cursor: pointer; */ /* Let's not make the whole li clickable anymore */
     transition: background-color 0.2s;
 }
 
@@ -128,10 +128,12 @@ h1 {
     margin-right: 15px;
     border-radius: 4px;
     object-fit: cover;
+    cursor: pointer; /* Make the thumbnail clickable to play */
 }
 
 .results-list li .info {
     flex-grow: 1;
+    cursor: pointer; /* Make the info part clickable to play */
 }
 
 .results-list li .info h3 {
@@ -150,4 +152,62 @@ h1 {
     font-size: 14px;
     color: #b3b3b3;
     margin-left: 15px;
+}
+
+/* Bottom Navigation */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #282828;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.3);
+}
+
+.bottom-nav button {
+    background: none;
+    border: none;
+    color: #b3b3b3;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.bottom-nav button i {
+    font-size: 20px;
+}
+
+.bottom-nav button.active {
+    color: #fff;
+}
+
+/* Track Actions */
+.track-actions {
+    display: flex;
+    gap: 15px;
+    margin-left: auto; /* Pushes actions to the right */
+    padding-left: 15px;
+}
+
+.track-actions button {
+    background: none;
+    border: none;
+    color: #b3b3b3;
+    font-size: 18px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.track-actions button:hover {
+    color: #fff;
+}
+
+.track-actions button.liked {
+    color: #1DB954; /* Green when liked */
 }
