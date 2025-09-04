@@ -229,6 +229,22 @@ h1 {
     transform: scale(1.2);
 }
 
+.queue-actions {
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
+    padding-left: 10px;
+}
+
+.queue-actions button {
+    font-size: 16px;
+}
+
+.results-list li.dragging {
+    opacity: 0.5;
+    background: #555;
+}
+
 /* Modal Styles */
 .modal {
     position: fixed;

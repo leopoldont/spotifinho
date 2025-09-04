@@ -2,10 +2,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Views
     const searchView = document.getElementById('searchView');
     const libraryView = document.getElementById('libraryView');
+    const queueView = document.getElementById('queueView');
 
     // Navigation
     const navSearch = document.getElementById('navSearch');
     const navLibrary = document.getElementById('navLibrary');
+    const navQueue = document.getElementById('navQueue');
 
     // Search
     const searchInput = document.getElementById('searchInput');
@@ -18,6 +20,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const libraryBackButton = document.getElementById('libraryBackButton');
     const createPlaylistButton = document.getElementById('createPlaylistButton');
     const libraryActions = document.getElementById('libraryActions');
+
+    // Queue
+    const queueList = document.getElementById('queueList');
 
     // Modal
     const addToPlaylistModal = document.getElementById('addToPlaylistModal');
@@ -74,16 +79,30 @@ document.addEventListener('DOMContentLoaded', () => {
     navSearch.addEventListener('click', () => {
         searchView.style.display = 'block';
         libraryView.style.display = 'none';
+        queueView.style.display = 'none';
         navSearch.classList.add('active');
         navLibrary.classList.remove('active');
+        navQueue.classList.remove('active');
     });
 
     navLibrary.addEventListener('click', () => {
         searchView.style.display = 'none';
         libraryView.style.display = 'block';
+        queueView.style.display = 'none';
         navSearch.classList.remove('active');
         navLibrary.classList.add('active');
+        navQueue.classList.remove('active');
         showPlaylists();
+    });
+
+    navQueue.addEventListener('click', () => {
+        searchView.style.display = 'none';
+        libraryView.style.display = 'none';
+        queueView.style.display = 'block';
+        navSearch.classList.remove('active');
+        navLibrary.classList.remove('active');
+        navQueue.classList.add('active');
+        showQueue();
     });
 
     // --- Search ---
@@ -176,6 +195,119 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+
+    // --- Queue Display ---
+    let draggedIndex = -1;
+
+    function showQueue() {
+        queueList.innerHTML = '';
+        if (playQueue.length === 0) {
+            queueList.innerHTML = '<li>A fila de reprodução está vazia.</li>';
+            return;
+        }
+
+        playQueue.forEach((track, index) => {
+            const listItem = document.createElement('li');
+            listItem.dataset.index = index;
+            listItem.draggable = true;
+            listItem.innerHTML = `
+                <img src="${track.thumbnail}" alt="${track.title}" class="track-thumbnail">
+                <div class="info">
+                    <h3>${track.title}</h3>
+                    <p>${track.artist}</p>
+                </div>
+                <div class="track-actions queue-actions">
+                    <button class="queue-move-up" title="Mover para Cima"><i class="fas fa-arrow-up"></i></button>
+                    <button class="queue-move-down" title="Mover para Baixo"><i class="fas fa-arrow-down"></i></button>
+                    <button class="queue-remove" title="Remover da Fila"><i class="fas fa-times"></i></button>
+                </div>
+            `;
+
+            // Click to play
+            listItem.querySelector('.info').addEventListener('click', () => {
+                // To play a song from the queue, we move it to the top and play it
+                const toPlay = playQueue.splice(index, 1)[0];
+                playQueue.unshift(toPlay);
+                playSong(playQueue.shift());
+                showQueue(); // Refresh queue to show new order
+            });
+
+            // Action buttons
+            listItem.querySelector('.queue-remove').addEventListener('click', (e) => {
+                e.stopPropagation();
+                playQueue.splice(index, 1);
+                showQueue();
+            });
+
+            listItem.querySelector('.queue-move-up').addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (index > 0) {
+                    const [item] = playQueue.splice(index, 1);
+                    playQueue.splice(index - 1, 0, item);
+                    showQueue();
+                }
+            });
+
+            listItem.querySelector('.queue-move-down').addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (index < playQueue.length - 1) {
+                    const [item] = playQueue.splice(index, 1);
+                    playQueue.splice(index + 1, 0, item);
+                    showQueue();
+                }
+            });
+
+            // Drag and Drop
+            listItem.addEventListener('dragstart', (e) => {
+                draggedIndex = index;
+                e.dataTransfer.effectAllowed = 'move';
+                setTimeout(() => listItem.classList.add('dragging'), 0);
+            });
+
+            listItem.addEventListener('dragend', () => {
+                listItem.classList.remove('dragging');
+            });
+
+            queueList.appendChild(listItem);
+        });
+    }
+
+    queueList.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        const afterElement = getDragAfterElement(queueList, e.clientY);
+        const dragging = document.querySelector('.dragging');
+        if (afterElement == null) {
+            queueList.appendChild(dragging);
+        } else {
+            queueList.insertBefore(dragging, afterElement);
+        }
+    });
+
+    queueList.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const droppedOn = e.target.closest('li');
+        if (!droppedOn) return;
+        const droppedIndex = parseInt(droppedOn.dataset.index);
+        
+        const [draggedItem] = playQueue.splice(draggedIndex, 1);
+        playQueue.splice(droppedIndex, 0, draggedItem);
+        
+        showQueue();
+    });
+
+    function getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('li:not(.dragging)')];
+
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
 
     // --- Modal Logic ---
     function openAddToPlaylistModal(track) {
@@ -349,11 +481,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function addToQueue(track, button) {
         playQueue.push(track);
-        // Visual feedback
-        button.classList.add('added');
-        setTimeout(() => {
-            button.classList.remove('added');
-        }, 1000);
+        
+        // Visual feedback on the button
+        if (button) {
+            button.classList.add('added');
+            setTimeout(() => {
+                button.classList.remove('added');
+            }, 1000);
+        }
+
+        // If queue view is active, refresh it
+        if (queueView.style.display === 'block') {
+            showQueue();
+        }
     }
 
     audioPlayer.addEventListener('ended', () => {
