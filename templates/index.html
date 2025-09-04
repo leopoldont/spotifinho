@@ -33,10 +33,24 @@
         </div>
 
         <div id="libraryView" style="display: none;">
-            <h1>Minha Biblioteca</h1>
+            <div class="library-header">
+                <button id="libraryBackButton" style="display: none;"><i class="fas fa-arrow-left"></i></button>
+                <h1 id="libraryTitle">Minha Biblioteca</h1>
+            </div>
             <ul class="results-list" id="libraryList">
-                <!-- Músicas curtidas serão exibidas aqui -->
+                <!-- Playlists ou músicas da playlist serão exibidas aqui -->
             </ul>
+            <div id="libraryActions">
+                <button id="createPlaylistButton">Criar Nova Playlist</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="addToPlaylistModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Adicionar à playlist</h2>
+            <ul id="modalPlaylistList"></ul>
         </div>
     </div>
 
