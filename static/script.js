@@ -36,6 +36,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const deletePlaylistOption = document.getElementById('deletePlaylistOption');
     let activePlaylistForMenu = null;
 
+    // Toast Notifications
+    const toastContainer = document.getElementById('toastContainer');
+
+    function showToast(message) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
+        toastContainer.appendChild(toast);
+
+        // Remove the toast after the animation ends (3 seconds)
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+
     // Player
     const audioPlayer = document.getElementById('audioPlayer');
     const playerInfo = document.getElementById('playerInfo');
@@ -262,6 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
         delete playlists[playlistName];
         savePlaylists(playlists);
         showPlaylists();
+        showToast(`Playlist "${playlistName}" excluída.`);
     }
 
     function showPlaylistSongs(playlistName) {
@@ -285,6 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 playlists[playlistName] = [];
                 savePlaylists(playlists);
                 showPlaylists();
+                showToast(`Playlist "${playlistName}" criada.`);
             } else {
                 alert('Uma playlist com este nome já existe.');
             }
@@ -434,6 +451,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!playlists[playlistName].some(song => song.id === trackToAdd.id)) {
             playlists[playlistName].push(trackToAdd);
             savePlaylists(playlists);
+            showToast(`Adicionado à playlist "${playlistName}".`);
+        } else {
+            showToast(`Música já existe na playlist "${playlistName}".`);
         }
         closeAddToPlaylistModal();
     }
@@ -547,6 +567,7 @@ document.addEventListener('DOMContentLoaded', () => {
             savePlaylists(playlists);
             // Refresh the view
             showPlaylistSongs(playlistName);
+            showToast('Música removida da playlist.');
         }
     }
 
@@ -664,6 +685,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function addToQueue(track, button) {
         playQueue.push(track);
+        showToast(`"${track.title}" adicionado à fila.`);
         
         // Visual feedback on the button
         if (button) {
