@@ -9,19 +9,18 @@
 </head>
 <body>
     <div class="container">
+        <div class="player-container">
+            <div id="playerSpinner" class="spinner" style="display: none;"></div>
+            <div id="playerInfo" class="player-info" style="display: none;">
+                <div class="player-track-details">
+                    <h3 id="currentTrackTitle"></h3>
+                </div>
+            </div>
+            <audio class="audio-player" id="audioPlayer" controls></audio>
+        </div>
+
         <div id="searchView">
             <h1>Spotifinho Web</h1>
-
-            <div class="player-container">
-                <div id="playerInfo" class="player-info" style="display: none;">
-                    <img id="currentTrackThumbnail" src="" alt="Thumbnail" class="player-thumbnail">
-                    <div class="player-track-details">
-                        <h3 id="currentTrackTitle"></h3>
-                        <p id="currentTrackArtist"></p>
-                    </div>
-                </div>
-                <audio class="audio-player" id="audioPlayer" controls></audio>
-            </div>
 
             <div class="search-bar">
                 <input type="text" id="searchInput" placeholder="Pesquisar músicas">

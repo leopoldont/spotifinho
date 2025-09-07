@@ -54,9 +54,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Player
     const audioPlayer = document.getElementById('audioPlayer');
     const playerInfo = document.getElementById('playerInfo');
-    const currentTrackThumbnail = document.getElementById('currentTrackThumbnail');
     const currentTrackTitle = document.getElementById('currentTrackTitle');
-    const currentTrackArtist = document.getElementById('currentTrackArtist');
+    const playerSpinner = document.getElementById('playerSpinner');
+
+    let currentTrackDuration = 0;
 
     // --- Queue ---
     let playQueue = [];
@@ -337,11 +338,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Click to play
             listItem.querySelector('.info').addEventListener('click', () => {
-                // To play a song from the queue, we move it to the top and play it
-                const toPlay = playQueue.splice(index, 1)[0];
-                playQueue.unshift(toPlay);
-                playSong(playQueue.shift());
-                showQueue(); // Refresh queue to show new order
+                // When a song from the queue is clicked, we play it and make the rest of the list the new queue.
+                const trackToPlay = playQueue[index];
+                playQueue = playQueue.slice(index + 1);
+                playSong(trackToPlay);
+                showQueue(); // Refresh queue
             });
 
             // Action buttons
@@ -517,8 +518,36 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
 
             // Click to play
-            listItem.querySelector('.info').addEventListener('click', () => playSong(result));
-            listItem.querySelector('.track-thumbnail').addEventListener('click', () => playSong(result));
+            listItem.querySelector('.info').addEventListener('click', () => {
+                // If we are inside a playlist, clicking a song plays it and sets the rest of the playlist as the queue.
+                if (options.playlistName) {
+                    const playlistSongs = getPlaylists()[options.playlistName] || [];
+                    const songIndex = playlistSongs.findIndex(song => song.id === result.id);
+                    if (songIndex !== -1) {
+                        playQueue = playlistSongs.slice(songIndex + 1);
+                    }
+                }
+                playSong(result);
+                // If the queue view is active, refresh it to show the new queue
+                if (queueView.style.display === 'block') {
+                    showQueue();
+                }
+            });
+            listItem.querySelector('.track-thumbnail').addEventListener('click', () => {
+                 // If we are inside a playlist, clicking a song plays it and sets the rest of the playlist as the queue.
+                if (options.playlistName) {
+                    const playlistSongs = getPlaylists()[options.playlistName] || [];
+                    const songIndex = playlistSongs.findIndex(song => song.id === result.id);
+                    if (songIndex !== -1) {
+                        playQueue = playlistSongs.slice(songIndex + 1);
+                    }
+                }
+                playSong(result);
+                // If the queue view is active, refresh it to show the new queue
+                if (queueView.style.display === 'block') {
+                    showQueue();
+                }
+            });
 
             // Action buttons
             const likeButton = listItem.querySelector('.like-button');
@@ -573,6 +602,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Player & Actions ---
     async function playSong(track) {
+        // Store the correct duration from the search metadata
+        const durationParts = track.duration.split(':');
+        if (durationParts.length === 2) {
+            currentTrackDuration = parseInt(durationParts[0], 10) * 60 + parseInt(durationParts[1], 10);
+        } else {
+            currentTrackDuration = 0; // Reset if duration is invalid
+        }
+
+        playerSpinner.style.display = 'block';
+        playerInfo.style.display = 'none';
+
         // If the track already has a pre-fetched stream URL, use it directly.
         if (track.stream_url) {
             audioPlayer.src = track.stream_url;
@@ -588,6 +628,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (data.error) {
                 alert(`Erro ao obter URL de streaming: ${data.error}`);
+                playerSpinner.style.display = 'none';
                 return;
             }
 
@@ -597,11 +638,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 startPlayback(track);
             } else {
                 alert('Não foi possível obter o URL de streaming.');
+                playerSpinner.style.display = 'none';
             }
         } catch (error) {
             console.error('Erro ao reproduzir música:', error);
             alert('Erro ao reproduzir música.');
             clearPlayingUI(track);
+            playerSpinner.style.display = 'none';
         }
     }
 
@@ -614,10 +657,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const listItemInLibrary = document.querySelector(`#libraryList li[data-video-id="${track.id}"]`);
 
         playerInfo.style.display = 'flex';
-        currentTrackThumbnail.src = track.thumbnail;
-        currentTrackThumbnail.style.display = 'block';
         currentTrackTitle.textContent = track.title;
-        currentTrackArtist.textContent = track.artist;
 
         if (listItemInSearch) listItemInSearch.classList.add('playing');
         if (listItemInLibrary) listItemInLibrary.classList.add('playing');
@@ -627,10 +667,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const playPromise = audioPlayer.play();
         if (playPromise !== undefined) {
             playPromise.then(_ => {
+                playerSpinner.style.display = 'none';
+                playerInfo.style.display = 'flex';
                 // Pre-fetch the stream URL for the next song
                 preloadNextSongInQueue();
             }).catch(error => {
                 console.error("A reprodução automática foi impedida:", error);
+                playerSpinner.style.display = 'none';
                 clearPlayingUI(track);
             });
         }
@@ -719,6 +762,20 @@ document.addEventListener('DOMContentLoaded', () => {
     currentTrackThumbnail.onerror = function() {
         this.style.display = 'none';
     };
+
+    audioPlayer.addEventListener('timeupdate', () => {
+        // Workaround for incorrect duration bug
+        if (currentTrackDuration > 0 && audioPlayer.currentTime >= currentTrackDuration + 1) {
+            // Add a 1-second buffer before triggering end
+            if (!audioPlayer.paused) {
+                console.log('Forçando fim da música devido a duração incorreta.');
+                audioPlayer.pause();
+                // Manually trigger the 'ended' event to play the next song
+                const endedEvent = new Event('ended');
+                audioPlayer.dispatchEvent(endedEvent);
+            }
+        }
+    });
 
     // Initial load
     showPlaylists();
