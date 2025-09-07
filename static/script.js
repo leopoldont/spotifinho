@@ -30,6 +30,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeButton = document.querySelector('.close-button');
     let trackToAdd = null;
 
+    // Playlist Context Menu
+    const playlistContextMenu = document.getElementById('playlistContextMenu');
+    const renamePlaylistOption = document.getElementById('renamePlaylistOption');
+    const deletePlaylistOption = document.getElementById('deletePlaylistOption');
+    let activePlaylistForMenu = null;
+
     // Player
     const audioPlayer = document.getElementById('audioPlayer');
     const playerInfo = document.getElementById('playerInfo');
@@ -183,20 +189,61 @@ document.addEventListener('DOMContentLoaded', () => {
         // Can't edit the main liked songs playlist
         if (playlistName === 'Músicas Curtidas') return;
 
-        const action = prompt(`Ações para "${playlistName}":\nDigite 'renomear' ou 'excluir'.`);
+        activePlaylistForMenu = playlistName;
+        const rect = button.getBoundingClientRect();
+        playlistContextMenu.style.display = 'block';
+        playlistContextMenu.style.top = `${rect.bottom}px`;
+        playlistContextMenu.style.left = `${rect.left - playlistContextMenu.offsetWidth + rect.width}px`; // Align to the right
 
-        if (action && action.toLowerCase() === 'excluir') {
-            const confirmation = confirm(`Deseja realmente excluir a playlist "${playlistName}"?`);
-            if (confirmation) {
-                deletePlaylist(playlistName);
+        // This function will handle closing the menu
+        const closeMenuHandler = (event) => {
+            // Close if the click is outside the menu that is being opened
+            if (playlistContextMenu.style.display === 'block' && !playlistContextMenu.contains(event.target) && !button.contains(event.target)) {
+                closePlaylistMenu();
             }
-        } else if (action && action.toLowerCase() === 'renomear') {
-            const newName = prompt("Digite o novo nome para a playlist:");
-            if (newName && newName.trim() !== '') {
-                renamePlaylist(playlistName, newName.trim());
+        };
+
+        // Use a timeout to avoid the same click event that opened the menu from closing it immediately
+        setTimeout(() => {
+            document.addEventListener('click', closeMenuHandler);
+        }, 0);
+
+        // Make sure we remove the listener once the menu is closed
+        const observer = new MutationObserver((mutations) => {
+            for (const mutation of mutations) {
+                if (mutation.attributeName === 'style' && playlistContextMenu.style.display === 'none') {
+                    document.removeEventListener('click', closeMenuHandler);
+                    observer.disconnect();
+                }
             }
-        }
+        });
+        observer.observe(playlistContextMenu, { attributes: true });
     }
+
+    function closePlaylistMenu() {
+        playlistContextMenu.style.display = 'none';
+        activePlaylistForMenu = null;
+    }
+
+    renamePlaylistOption.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (!activePlaylistForMenu) return;
+        const newName = prompt(`Digite o novo nome para a playlist "${activePlaylistForMenu}":`);
+        if (newName && newName.trim() !== '') {
+            renamePlaylist(activePlaylistForMenu, newName.trim());
+        }
+        closePlaylistMenu();
+    });
+
+    deletePlaylistOption.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (!activePlaylistForMenu) return;
+        const confirmation = confirm(`Deseja realmente excluir a playlist "${activePlaylistForMenu}"?`);
+        if (confirmation) {
+            deletePlaylist(activePlaylistForMenu);
+        }
+        closePlaylistMenu();
+    });
 
     function renamePlaylist(oldName, newName) {
         const playlists = getPlaylists();
