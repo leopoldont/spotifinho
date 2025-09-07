@@ -115,8 +115,8 @@ h1 {
     align-items: center;
     padding: 12px;
     border-radius: 4px;
-    /* cursor: pointer; */ /* Let's not make the whole li clickable anymore */
     transition: background-color 0.2s;
+    cursor: pointer;
 }
 
 .results-list li:hover, .library-items-list li:hover {

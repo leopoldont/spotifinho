@@ -1,71 +1,32 @@
-==> Cloning from https://github.com/leodeschain/spotifinho
-==> Checking out commit 2f5cbbdc32dac08385a3100bc3c334a3c554392e in branch master
-==> Using Python version 3.13.4 (default)
-==> Docs on specifying a Python version: https://render.com/docs/python-version
-==> Using Poetry version 2.1.3 (default)
-==> Docs on specifying a Poetry version: https://render.com/docs/poetry-version
-==> Running build command 'pip install -r requirements.txt'...
-Collecting Flask (from -r requirements.txt (line 1))
-  Downloading flask-3.1.2-py3-none-any.whl.metadata (3.2 kB)
-Collecting yt-dlp (from -r requirements.txt (line 2))
-  Downloading yt_dlp-2025.8.27-py3-none-any.whl.metadata (175 kB)
-Collecting gunicorn (from -r requirements.txt (line 3))
-  Downloading gunicorn-23.0.0-py3-none-any.whl.metadata (4.4 kB)
-Collecting blinker>=1.9.0 (from Flask->-r requirements.txt (line 1))
-  Downloading blinker-1.9.0-py3-none-any.whl.metadata (1.6 kB)
-Collecting click>=8.1.3 (from Flask->-r requirements.txt (line 1))
-  Downloading click-8.2.1-py3-none-any.whl.metadata (2.5 kB)
-Collecting itsdangerous>=2.2.0 (from Flask->-r requirements.txt (line 1))
-  Downloading itsdangerous-2.2.0-py3-none-any.whl.metadata (1.9 kB)
-Collecting jinja2>=3.1.2 (from Flask->-r requirements.txt (line 1))
-  Downloading jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
-Collecting markupsafe>=2.1.1 (from Flask->-r requirements.txt (line 1))
-  Downloading MarkupSafe-3.0.2-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.0 kB)
-Collecting werkzeug>=3.1.0 (from Flask->-r requirements.txt (line 1))
-  Downloading werkzeug-3.1.3-py3-none-any.whl.metadata (3.7 kB)
-Collecting packaging (from gunicorn->-r requirements.txt (line 3))
-  Downloading packaging-25.0-py3-none-any.whl.metadata (3.3 kB)
-Downloading flask-3.1.2-py3-none-any.whl (103 kB)
-Downloading yt_dlp-2025.8.27-py3-none-any.whl (3.3 MB)
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.3/3.3 MB 136.6 MB/s eta 0:00:00
-Downloading gunicorn-23.0.0-py3-none-any.whl (85 kB)
-Downloading blinker-1.9.0-py3-none-any.whl (8.5 kB)
-Downloading click-8.2.1-py3-none-any.whl (102 kB)
-Downloading itsdangerous-2.2.0-py3-none-any.whl (16 kB)
-Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
-Downloading MarkupSafe-3.0.2-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (23 kB)
-Downloading werkzeug-3.1.3-py3-none-any.whl (224 kB)
-Downloading packaging-25.0-py3-none-any.whl (66 kB)
-Installing collected packages: yt-dlp, packaging, markupsafe, itsdangerous, click, blinker, werkzeug, jinja2, gunicorn, Flask
-Successfully installed Flask-3.1.2 blinker-1.9.0 click-8.2.1 gunicorn-23.0.0 itsdangerous-2.2.0 jinja2-3.1.6 markupsafe-3.0.2 packaging-25.0 werkzeug-3.1.3 yt-dlp-2025.8.27
-[notice] A new release of pip is available: 25.1.1 -> 25.2
-[notice] To update, run: pip install --upgrade pip
-==> Uploading build...
-==> Uploaded in 4.4s. Compression took 1.0s
-==> Build successful 🎉
-==> Deploying...
-==> Running 'gunicorn app:app'
-[2025-09-03 15:59:55 +0000] [57] [INFO] Starting gunicorn 23.0.0
-[2025-09-03 15:59:55 +0000] [57] [INFO] Listening at: http://0.0.0.0:10000 (57)
-[2025-09-03 15:59:55 +0000] [57] [INFO] Using worker: sync
-[2025-09-03 15:59:55 +0000] [58] [INFO] Booting worker with pid: 58
-127.0.0.1 - - [03/Sep/2025:15:59:56 +0000] "HEAD / HTTP/1.1" 200 0 "-" "Go-http-client/1.1"
-==> Your service is live 🎉
-==> 
-==> ///////////////////////////////////////////////////////////
-==> 
-==> Available at your primary URL https://spotifinho.onrender.com
-==> 
-==> ///////////////////////////////////////////////////////////
-127.0.0.1 - - [03/Sep/2025:16:00:10 +0000] "GET / HTTP/1.1" 200 1905 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
-127.0.0.1 - - [03/Sep/2025:16:00:10 +0000] "GET /static/script.js HTTP/1.1" 200 0 "https://spotifinho.onrender.com/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
-127.0.0.1 - - [03/Sep/2025:16:00:10 +0000] "GET /static/style.css HTTP/1.1" 200 0 "https://spotifinho.onrender.com/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
-127.0.0.1 - - [03/Sep/2025:16:00:11 +0000] "GET / HTTP/1.1" 200 1905 "-" "Go-http-client/2.0"
-127.0.0.1 - - [03/Sep/2025:16:00:12 +0000] "GET /favicon.ico HTTP/1.1" 404 207 "https://spotifinho.onrender.com/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
-127.0.0.1 - - [03/Sep/2025:16:00:54 +0000] "GET /api/search?q=tool%20the%20pot HTTP/1.1" 200 2863 "https://spotifinho.onrender.com/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
-127.0.0.1 - - [03/Sep/2025:16:00:58 +0000] "GET / HTTP/1.1" 200 1905 "-" "WhatsApp/2.23.20.0"
-127.0.0.1 - - [03/Sep/2025:16:00:58 +0000] "GET /favicon.ico HTTP/1.1" 404 207 "-" "WhatsApp/2.23.20.0"
-WARNING: [youtube] Unable to download webpage: HTTP Error 429: Too Many Requests (caused by <HTTPError 429: Too Many Requests>)
-ERROR: [youtube] civuoU_NE38: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies
-Error during stream URL extraction: ERROR: [youtube] civuoU_NE38: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies
-127.0.0.1 - - [03/Sep/2025:16:01:30 +0000] "GET /api/stream?id=civuoU_NE38 HTTP/1.1" 500 62 "https://spotifinho.onrender.com/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
+You are about to visit:
+https://spotifinho.loca.lt
+This website is served for free via a localtunnel.
+
+You should only visit this website if you trust whoever sent this link to you.
+
+Be careful about giving up personal or financial details such as passwords, credit cards, phone numbers, emails, etc. Phishing pages often look similar to pages of known banks, social networks, email portals or other trusted institutions in order to acquire personal information such as usernames, passwords or credit card details.
+
+Please proceed with caution.
+
+To access the website, please enter the tunnel password below.
+If you don't know what it is, please ask whoever you got this link from.
+Tunnel Password:
+*******
+Are you the developer?
+If you're the developer of this website, please read this:
+
+We display this page to prevent abuse.
+You and other visitors will only see this page from a standard web browser once per public IP every 7 days.
+The tunnel password is the public IP of the computer running the localtunnel client (or your vpn's public IP if you're connected to one).
+You'll need to share your tunnel password with your link visitors in order for them to access your content.
+To get your tunnel password, you can either:
+
+If running the localtunnel client on a local computer, visit this link in a web browser on that PC or any other PC on the same network: https://loca.lt/mytunnelpassword
+
+If running the localtunnel client on a remote computer, ssh into the remote computer and run one of the following:
+curl https://loca.lt/mytunnelpassword or wget -q -O - https://loca.lt/mytunnelpassword
+To bypass this page:
+Set a bypass-tunnel-reminder request header with any value
+Or, set and send a custom / non-standard browser User-Agent request header
+Note: it's not possible to fully remove this page for all visitors at this time.
+Webhook, IPN, and other non-browser requests "should" be directly tunnelled to your localhost. If your webhook/ipn provider happens to send requests using a real browser user-agent header, those requests will unfortunately also be blocked / be forced to see this tunnel reminder page. FYI, this page returns a 401 HTTP Status.

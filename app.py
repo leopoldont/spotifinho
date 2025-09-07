@@ -90,5 +90,5 @@ def stream():
         return jsonify({'error': 'Failed to get stream URL. Please try again later.'}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False)
 

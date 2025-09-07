@@ -75,3 +75,18 @@ Este documento resume as instruções e o escopo atual do projeto.
 *   **Estrutura da UI:** A introdução de uma barra de navegação e uma nova seção "Biblioteca" exigirá uma refatoração do `index.html` para suportar múltiplas "páginas" ou "visualizações". Podemos gerenciar a visibilidade das seções (Pesquisa, Biblioteca) com JavaScript, sem a necessidade de recarregar a página.
 *   **Modo Offline:** O download de áudio do YouTube para o dispositivo do cliente é tecnicamente complexo e pode violar os termos de serviço do YouTube. Uma abordagem mais viável seria usar Service Workers para cachear os streams de áudio, permitindo a reprodução offline. Isso adiciona uma camada significativa de complexidade, mas é a abordagem correta para uma PWA (Progressive Web App).
 
+### Funcionalidades Desejadas (Sessão 2)
+
+1.  **Fila de Reprodução:**
+    *   Implementar uma função "Adicionar à Fila" para as músicas.
+    *   As músicas adicionadas à fila devem ser reproduzidas em sequência após a música atual terminar.
+
+2.  **Sistema de Múltiplas Playlists:**
+    *   Habilitar a criação e gerenciamento de múltiplas playlists na seção "Biblioteca".
+    *   Ao lado do botão "Adicionar à Fila", criar um botão "Adicionar à Playlist...".
+    *   Este botão deve revelar um submenu ou dropdown (com um bom design) que lista as playlists existentes para que o usuário possa escolher onde adicionar a música.
+
+3.  **Melhorias de UI/UX:**
+    *   Revisar e melhorar a funcionalidade de scroll em toda a aplicação, especialmente na lista de resultados e playlists.
+    *   Ajustar as proporções dos elementos da interface (player, resultados, etc.) para uma melhor harmonia visual em diferentes tamanhos de tela.
+

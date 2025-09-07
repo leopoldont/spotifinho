@@ -336,8 +336,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
 
-            // Click to play
-            listItem.querySelector('.info').addEventListener('click', () => {
+            // Click listener for the entire list item
+            listItem.addEventListener('click', (e) => {
+                // Do nothing if an action button was clicked
+                if (e.target.closest('.track-actions')) {
+                    return;
+                }
                 // When a song from the queue is clicked, we play it and make the rest of the list the new queue.
                 const trackToPlay = playQueue[index];
                 playQueue = playQueue.slice(index + 1);
@@ -517,8 +521,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span class="duration">${result.duration}</span>
             `;
 
-            // Click to play
-            listItem.querySelector('.info').addEventListener('click', () => {
+            // Click listener for the entire list item
+            listItem.addEventListener('click', (e) => {
+                // Do nothing if an action button was clicked
+                if (e.target.closest('.track-actions')) {
+                    return;
+                }
+
                 // If we are inside a playlist, clicking a song plays it and sets the rest of the playlist as the queue.
                 if (options.playlistName) {
                     const playlistSongs = getPlaylists()[options.playlistName] || [];
@@ -533,23 +542,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     showQueue();
                 }
             });
-            listItem.querySelector('.track-thumbnail').addEventListener('click', () => {
-                 // If we are inside a playlist, clicking a song plays it and sets the rest of the playlist as the queue.
-                if (options.playlistName) {
-                    const playlistSongs = getPlaylists()[options.playlistName] || [];
-                    const songIndex = playlistSongs.findIndex(song => song.id === result.id);
-                    if (songIndex !== -1) {
-                        playQueue = playlistSongs.slice(songIndex + 1);
-                    }
-                }
-                playSong(result);
-                // If the queue view is active, refresh it to show the new queue
-                if (queueView.style.display === 'block') {
-                    showQueue();
-                }
-            });
 
-            // Action buttons
+            // Action buttons (like, add to queue, etc.)
             const likeButton = listItem.querySelector('.like-button');
             if (likeButton) {
                 likeButton.addEventListener('click', (e) => {
