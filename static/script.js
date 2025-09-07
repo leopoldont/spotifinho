@@ -552,15 +552,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Player & Actions ---
     async function playSong(track) {
-        // If the track already has a local path, just play it.
-        if (track.preloaded_path) {
-            audioPlayer.src = track.preloaded_path;
+        // If the track already has a pre-fetched stream URL, use it directly.
+        if (track.stream_url) {
+            audioPlayer.src = track.stream_url;
             updatePlayerUI(track);
             startPlayback(track);
             return; // Skip fetching from API
         }
 
-        // Otherwise, fetch the stream URL as before.
+        // Otherwise, fetch the stream URL now.
         try {
             const response = await fetch(`/api/stream?id=${encodeURIComponent(track.id)}`);
             const data = await response.json();
@@ -606,7 +606,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const playPromise = audioPlayer.play();
         if (playPromise !== undefined) {
             playPromise.then(_ => {
-                // Preload the next song only after the current one starts playing successfully
+                // Pre-fetch the stream URL for the next song
                 preloadNextSongInQueue();
             }).catch(error => {
                 console.error("A reprodução automática foi impedida:", error);
@@ -625,24 +625,18 @@ document.addEventListener('DOMContentLoaded', () => {
     async function preloadNextSongInQueue() {
         if (playQueue.length > 0) {
             const nextTrack = playQueue[0]; // Peek at the next track
-            if (nextTrack && !nextTrack.preloaded_path) {
-                console.log(`Pré-carregando: ${nextTrack.title}`);
+            if (nextTrack && !nextTrack.stream_url) { // Check if it doesn't have a URL already
+                console.log(`Pré-buscando URL para: ${nextTrack.title}`);
                 try {
-                    const response = await fetch('/api/preload', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ id: nextTrack.id }),
-                    });
+                    const response = await fetch(`/api/stream?id=${encodeURIComponent(nextTrack.id)}`);
                     const data = await response.json();
-                    if (data.preloaded_path) {
-                        // Update the track object in the queue with the preloaded path
-                        nextTrack.preloaded_path = data.preloaded_path;
-                        console.log(`Pré-carregado com sucesso: ${nextTrack.title}`);
+                    if (data.stream_url) {
+                        // Update the track object in the queue with the pre-fetched URL
+                        nextTrack.stream_url = data.stream_url;
+                        console.log(`URL pré-buscada com sucesso para: ${nextTrack.title}`);
                     }
                 } catch (error) {
-                    console.error('Falha no pré-carregamento:', error);
+                    console.error('Falha na pré-busca de URL:', error);
                 }
             }
         }
