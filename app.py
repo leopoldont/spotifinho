@@ -1,7 +1,16 @@
 import yt_dlp
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_from_directory
+import os
 
 app = Flask(__name__)
+
+# --- Configuração de Cache ---
+TEMP_FOLDER = 'temp_audio'
+if not os.path.exists(TEMP_FOLDER):
+    os.makedirs(TEMP_FOLDER)
+
+app.config['TEMP_FOLDER'] = TEMP_FOLDER
+
 
 @app.route('/')
 def index():
@@ -80,6 +89,38 @@ def stream():
     except Exception as e:
         print(f"Error during stream URL extraction: {e}")
         return jsonify({'error': 'Failed to get stream URL. Please try again later.'}), 500
+
+@app.route('/api/preload', methods=['POST'])
+def preload():
+    data = request.get_json()
+    video_id = data.get('id')
+    if not video_id:
+        return jsonify({'error': 'Video ID is required'}), 400
+
+    filepath = os.path.join(app.config['TEMP_FOLDER'], f'{video_id}.m4a')
+
+    # If file already exists, no need to re-download
+    if os.path.exists(filepath):
+        return jsonify({'preloaded_path': f'/audio/{video_id}.m4a'})
+
+    try:
+        ydl_opts = {
+            'format': 'bestaudio[ext=m4a]/bestaudio',
+            'outtmpl': filepath,
+            'noplaylist': True,
+            'quiet': True,
+        }
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([f"https://www.youtube.com/watch?v={video_id}"])
+        
+        return jsonify({'preloaded_path': f'/audio/{video_id}.m4a'})
+    except Exception as e:
+        print(f"Error during preload: {e}")
+        return jsonify({'error': 'Failed to preload audio.'}), 500
+
+@app.route('/audio/<filename>')
+def serve_audio(filename):
+    return send_from_directory(app.config['TEMP_FOLDER'], filename)
 
 if __name__ == '__main__':
     app.run(debug=True)

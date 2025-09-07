@@ -165,8 +165,56 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
             listItem.addEventListener('click', () => showPlaylistSongs(name));
+
+            const threeDots = document.createElement('div');
+            threeDots.className = 'playlist-actions';
+            threeDots.innerHTML = '<i class="fas fa-ellipsis-v"></i>';
+            threeDots.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showPlaylistMenu(e.currentTarget, name);
+            });
+
+            listItem.appendChild(threeDots);
             libraryList.appendChild(listItem);
         });
+    }
+
+    function showPlaylistMenu(button, playlistName) {
+        // Can't edit the main liked songs playlist
+        if (playlistName === 'Músicas Curtidas') return;
+
+        const action = prompt(`Ações para "${playlistName}":\nDigite 'renomear' ou 'excluir'.`);
+
+        if (action && action.toLowerCase() === 'excluir') {
+            const confirmation = confirm(`Deseja realmente excluir a playlist "${playlistName}"?`);
+            if (confirmation) {
+                deletePlaylist(playlistName);
+            }
+        } else if (action && action.toLowerCase() === 'renomear') {
+            const newName = prompt("Digite o novo nome para a playlist:");
+            if (newName && newName.trim() !== '') {
+                renamePlaylist(playlistName, newName.trim());
+            }
+        }
+    }
+
+    function renamePlaylist(oldName, newName) {
+        const playlists = getPlaylists();
+        if (playlists[newName]) {
+            alert('Uma playlist com este nome já existe.');
+            return;
+        }
+        playlists[newName] = playlists[oldName];
+        delete playlists[oldName];
+        savePlaylists(playlists);
+        showPlaylists();
+    }
+
+    function deletePlaylist(playlistName) {
+        const playlists = getPlaylists();
+        delete playlists[playlistName];
+        savePlaylists(playlists);
+        showPlaylists();
     }
 
     function showPlaylistSongs(playlistName) {
@@ -177,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const playlists = getPlaylists();
         const songs = playlists[playlistName] || [];
-        displayResults(songs, libraryList);
+        displayResults(songs, libraryList, { playlistName: playlistName });
     }
 
     libraryBackButton.addEventListener('click', showPlaylists);
@@ -351,19 +399,44 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Display ---
-    function displayResults(results, targetList) {
+    function displayResults(results, targetList, options = {}) {
         targetList.innerHTML = '';
         if (results.length === 0) {
-            targetList.innerHTML = '<li>Nenhuma música na sua biblioteca. Curta algumas para começar!</li>';
+            targetList.innerHTML = '<li>Nenhuma música encontrada.</li>';
+            if (options.playlistName === 'Músicas Curtidas') {
+                targetList.innerHTML = '<li>Nenhuma música na sua biblioteca. Curta algumas para começar!</li>';
+            }
             return;
         }
 
         const likedSongs = getLikedSongs();
 
-        results.forEach(result => {
+        results.forEach((result, index) => {
             const isLiked = likedSongs.some(song => song.id === result.id);
             const listItem = document.createElement('li');
             listItem.dataset.videoId = result.id;
+
+            let actionsHtml = `
+                <button class="like-button ${isLiked ? 'liked' : ''}" title="Salvar na Biblioteca">
+                    <i class="fas fa-heart"></i>
+                </button>
+                <button class="add-to-queue-button" title="Adicionar à Fila">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <button class="add-to-playlist-button" title="Adicionar à Playlist">
+                    <i class="fas fa-ellipsis-h"></i>
+                </button>
+            `;
+
+            // If showing songs from a playlist, add a remove button
+            if (options.playlistName) {
+                actionsHtml += `
+                    <button class="remove-from-playlist-button" title="Remover da Playlist">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+            }
+
             listItem.innerHTML = `
                 <img src="${result.thumbnail}" alt="${result.title}" class="track-thumbnail">
                 <div class="info">
@@ -371,15 +444,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p>${result.artist}</p>
                 </div>
                 <div class="track-actions">
-                    <button class="like-button ${isLiked ? 'liked' : ''}" title="Salvar na Biblioteca">
-                        <i class="fas fa-heart"></i>
-                    </button>
-                    <button class="add-to-queue-button" title="Adicionar à Fila">
-                        <i class="fas fa-plus"></i>
-                    </button>
-                    <button class="add-to-playlist-button" title="Adicionar à Playlist">
-                        <i class="fas fa-ellipsis-h"></i>
-                    </button>
+                    ${actionsHtml}
                 </div>
                 <span class="duration">${result.duration}</span>
             `;
@@ -388,38 +453,67 @@ document.addEventListener('DOMContentLoaded', () => {
             listItem.querySelector('.info').addEventListener('click', () => playSong(result));
             listItem.querySelector('.track-thumbnail').addEventListener('click', () => playSong(result));
 
-            // Click to like
+            // Action buttons
             const likeButton = listItem.querySelector('.like-button');
-            likeButton.addEventListener('click', (e) => {
-                e.stopPropagation();
-                toggleLike(result, likeButton);
-            });
+            if (likeButton) {
+                likeButton.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleLike(result, likeButton);
+                });
+            }
 
             const addToQueueButton = listItem.querySelector('.add-to-queue-button');
-            addToQueueButton.addEventListener('click', (e) => {
-                e.stopPropagation();
-                addToQueue(result, addToQueueButton);
-            });
+            if (addToQueueButton) {
+                addToQueueButton.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    addToQueue(result, addToQueueButton);
+                });
+            }
 
             const addToPlaylistButton = listItem.querySelector('.add-to-playlist-button');
-            addToPlaylistButton.addEventListener('click', (e) => {
-                e.stopPropagation();
-                openAddToPlaylistModal(result);
-            });
+            if (addToPlaylistButton) {
+                addToPlaylistButton.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openAddToPlaylistModal(result);
+                });
+            }
+
+            const removeFromPlaylistButton = listItem.querySelector('.remove-from-playlist-button');
+            if (removeFromPlaylistButton) {
+                removeFromPlaylistButton.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    removeSongFromPlaylist(result.id, options.playlistName, index);
+                });
+            }
 
             targetList.appendChild(listItem);
         });
     }
 
+    function removeSongFromPlaylist(songId, playlistName) {
+        const playlists = getPlaylists();
+        if (!playlists[playlistName]) return;
+
+        const songIndex = playlists[playlistName].findIndex(song => song.id === songId);
+        if (songIndex > -1) {
+            playlists[playlistName].splice(songIndex, 1);
+            savePlaylists(playlists);
+            // Refresh the view
+            showPlaylistSongs(playlistName);
+        }
+    }
+
     // --- Player & Actions ---
     async function playSong(track) {
-        document.querySelectorAll('.results-list li').forEach(item => {
-            item.classList.remove('playing');
-        });
+        // If the track already has a local path, just play it.
+        if (track.preloaded_path) {
+            audioPlayer.src = track.preloaded_path;
+            updatePlayerUI(track);
+            startPlayback(track);
+            return; // Skip fetching from API
+        }
 
-        const listItemInSearch = document.querySelector(`#resultsList li[data-video-id="${track.id}"]`);
-        const listItemInLibrary = document.querySelector(`#libraryList li[data-video-id="${track.id}"]`);
-
+        // Otherwise, fetch the stream URL as before.
         try {
             const response = await fetch(`/api/stream?id=${encodeURIComponent(track.id)}`);
             const data = await response.json();
@@ -431,31 +525,79 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (data.stream_url) {
                 audioPlayer.src = data.stream_url;
-                playerInfo.style.display = 'flex';
-                currentTrackThumbnail.src = track.thumbnail;
-                currentTrackThumbnail.style.display = 'block';
-                currentTrackTitle.textContent = track.title;
-                currentTrackArtist.textContent = track.artist;
-
-                if (listItemInSearch) listItemInSearch.classList.add('playing');
-                if (listItemInLibrary) listItemInLibrary.classList.add('playing');
-
-                const playPromise = audioPlayer.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch(error => {
-                        console.error("A reprodução automática foi impedida:", error);
-                        if (listItemInSearch) listItemInSearch.classList.remove('playing');
-                        if (listItemInLibrary) listItemInLibrary.classList.remove('playing');
-                    });
-                }
+                updatePlayerUI(track);
+                startPlayback(track);
             } else {
                 alert('Não foi possível obter o URL de streaming.');
             }
         } catch (error) {
             console.error('Erro ao reproduzir música:', error);
             alert('Erro ao reproduzir música.');
-            if (listItemInSearch) listItemInSearch.classList.remove('playing');
-            if (listItemInLibrary) listItemInLibrary.classList.remove('playing');
+            clearPlayingUI(track);
+        }
+    }
+
+    function updatePlayerUI(track) {
+        document.querySelectorAll('.results-list li, .library-items-list li').forEach(item => {
+            item.classList.remove('playing');
+        });
+
+        const listItemInSearch = document.querySelector(`#resultsList li[data-video-id="${track.id}"]`);
+        const listItemInLibrary = document.querySelector(`#libraryList li[data-video-id="${track.id}"]`);
+
+        playerInfo.style.display = 'flex';
+        currentTrackThumbnail.src = track.thumbnail;
+        currentTrackThumbnail.style.display = 'block';
+        currentTrackTitle.textContent = track.title;
+        currentTrackArtist.textContent = track.artist;
+
+        if (listItemInSearch) listItemInSearch.classList.add('playing');
+        if (listItemInLibrary) listItemInLibrary.classList.add('playing');
+    }
+
+    function startPlayback(track) {
+        const playPromise = audioPlayer.play();
+        if (playPromise !== undefined) {
+            playPromise.then(_ => {
+                // Preload the next song only after the current one starts playing successfully
+                preloadNextSongInQueue();
+            }).catch(error => {
+                console.error("A reprodução automática foi impedida:", error);
+                clearPlayingUI(track);
+            });
+        }
+    }
+
+    function clearPlayingUI(track) {
+        const listItemInSearch = document.querySelector(`#resultsList li[data-video-id="${track.id}"]`);
+        const listItemInLibrary = document.querySelector(`#libraryList li[data-video-id="${track.id}"]`);
+        if (listItemInSearch) listItemInSearch.classList.remove('playing');
+        if (listItemInLibrary) listItemInLibrary.classList.remove('playing');
+    }
+
+    async function preloadNextSongInQueue() {
+        if (playQueue.length > 0) {
+            const nextTrack = playQueue[0]; // Peek at the next track
+            if (nextTrack && !nextTrack.preloaded_path) {
+                console.log(`Pré-carregando: ${nextTrack.title}`);
+                try {
+                    const response = await fetch('/api/preload', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ id: nextTrack.id }),
+                    });
+                    const data = await response.json();
+                    if (data.preloaded_path) {
+                        // Update the track object in the queue with the preloaded path
+                        nextTrack.preloaded_path = data.preloaded_path;
+                        console.log(`Pré-carregado com sucesso: ${nextTrack.title}`);
+                    }
+                } catch (error) {
+                    console.error('Falha no pré-carregamento:', error);
+                }
+            }
         }
     }
 
@@ -498,8 +640,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     audioPlayer.addEventListener('ended', () => {
         if (playQueue.length > 0) {
-            const nextTrack = playQueue.shift();
+            const nextTrack = playQueue.shift(); // Get the next track and remove it from the queue
             playSong(nextTrack);
+            // The call to preloadNextSongInQueue() is now inside playSong(), so it's handled automatically.
+        } else {
+            // Optional: Clear player UI when the queue is empty
+            playerInfo.style.display = 'none';
+            currentTrackThumbnail.style.display = 'none';
+            document.querySelectorAll('.results-list li, .library-items-list li').forEach(item => {
+                item.classList.remove('playing');
+            });
         }
     });
 

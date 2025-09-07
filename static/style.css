@@ -91,12 +91,12 @@ h1 {
     background-color: #1ed760;
 }
 
-.results-list {
+.results-list, .library-items-list {
     list-style: none;
     padding: 0;
 }
 
-.results-list li {
+.results-list li, .library-items-list li {
     display: flex;
     align-items: center;
     padding: 12px;
@@ -105,7 +105,7 @@ h1 {
     transition: background-color 0.2s;
 }
 
-.results-list li:hover {
+.results-list li:hover, .library-items-list li:hover {
     background-color: #282828;
 }
 
@@ -118,7 +118,7 @@ h1 {
     background-color: #333;
 }
 
-.results-list li.playing .info h3 {
+.results-list li.playing .info h3, .library-items-list li.playing .info h3 {
     color: #1DB954;
 }
 
@@ -132,6 +132,17 @@ h1 {
 
 .playlist-item:hover .info h3 {
     color: #1DB954;
+}
+
+.playlist-item .playlist-actions {
+    color: #b3b3b3;
+    cursor: pointer;
+    padding: 10px;
+    margin-left: auto;
+}
+
+.playlist-item .playlist-actions:hover {
+    color: #fff;
 }
 
 .track-thumbnail {
@@ -298,4 +309,65 @@ h1 {
 
 #modalPlaylistList li:hover {
     background-color: #333;
+}
+
+/* --- Responsiveness --- */
+@media (max-width: 600px) {
+    body {
+        padding: 10px 10px 70px 10px; /* Adjust padding for smaller screens */
+    }
+
+    .container {
+        padding: 10px;
+    }
+
+    .player-thumbnail {
+        width: 50px;
+        height: 50px;
+    }
+
+    .search-bar {
+        flex-direction: column;
+    }
+
+    .search-bar input {
+        border-radius: 4px;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+
+    .search-bar button {
+        border-radius: 4px;
+    }
+
+    .results-list li, .library-items-list li {
+        padding: 8px;
+    }
+
+    .track-thumbnail {
+        width: 45px;
+        height: 45px;
+        margin-right: 10px;
+    }
+
+    .results-list li .info h3, .library-items-list li .info h3 {
+        font-size: 14px;
+    }
+
+    .results-list li .info p, .library-items-list li .info p {
+        font-size: 12px;
+    }
+
+    .track-actions {
+        gap: 8px;
+        padding-left: 8px;
+    }
+
+    .track-actions button {
+        font-size: 16px;
+    }
+
+    .bottom-nav button span {
+        display: none; /* Hide text on nav buttons on very small screens if needed */
+    }
 }
