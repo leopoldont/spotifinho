@@ -1,32 +1,53 @@
-You are about to visit:
-https://spotifinho.loca.lt
-This website is served for free via a localtunnel.
+Installation
+Setup an example by making a directory:
 
-You should only visit this website if you trust whoever sent this link to you.
+Copy code
+mkdir hello-ngrok && cd hello-ngrok
+Install python on your system here or use Homebrew:
 
-Be careful about giving up personal or financial details such as passwords, credit cards, phone numbers, emails, etc. Phishing pages often look similar to pages of known banks, social networks, email portals or other trusted institutions in order to acquire personal information such as usernames, passwords or credit card details.
+Copy code
+brew install python
+Install the python package:
 
-Please proceed with caution.
+Copy code
+python3 -m pip install ngrok
+Now we need a runnable example. Let's create a new entry file:
 
-To access the website, please enter the tunnel password below.
-If you don't know what it is, please ask whoever you got this link from.
-Tunnel Password:
-*******
-Are you the developer?
-If you're the developer of this website, please read this:
+Copy code
+touch example.py
+Put your app online
+hello-ngrok/example.py
+Copy code
+#!/usr/bin/env python
 
-We display this page to prevent abuse.
-You and other visitors will only see this page from a standard web browser once per public IP every 7 days.
-The tunnel password is the public IP of the computer running the localtunnel client (or your vpn's public IP if you're connected to one).
-You'll need to share your tunnel password with your link visitors in order for them to access your content.
-To get your tunnel password, you can either:
+from http.server import HTTPServer, BaseHTTPRequestHandler
+import logging, ngrok
 
-If running the localtunnel client on a local computer, visit this link in a web browser on that PC or any other PC on the same network: https://loca.lt/mytunnelpassword
 
-If running the localtunnel client on a remote computer, ssh into the remote computer and run one of the following:
-curl https://loca.lt/mytunnelpassword or wget -q -O - https://loca.lt/mytunnelpassword
-To bypass this page:
-Set a bypass-tunnel-reminder request header with any value
-Or, set and send a custom / non-standard browser User-Agent request header
-Note: it's not possible to fully remove this page for all visitors at this time.
-Webhook, IPN, and other non-browser requests "should" be directly tunnelled to your localhost. If your webhook/ipn provider happens to send requests using a real browser user-agent header, those requests will unfortunately also be blocked / be forced to see this tunnel reminder page. FYI, this page returns a 401 HTTP Status.
+class HelloHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        body = bytes("Hello", "utf-8")
+        self.protocol_version = "HTTP/1.1"
+        self.send_response(200)
+        self.send_header("Content-Length", len(body))
+        self.end_headers()
+        self.wfile.write(body)
+
+logging.basicConfig(level=logging.INFO)
+
+# Create the server and attach ngrok
+server = HTTPServer(("localhost", 0), HelloHandler)
+ngrok.listen(server)
+
+try:
+    logging.info("Starting server. Press Ctrl+C to stop.")
+    server.serve_forever()
+except KeyboardInterrupt:
+    logging.info("Shutting down server...")
+    server.server_close()
+    ngrok.kill()
+    logging.info("Server stopped cleanly.")
+Run your Python app with your ngrok authtoken as an environment variable. Sign up for a free account to get your authtoken.
+
+Copy code
+NGROK_AUTHTOKEN=<token> python3 example.py

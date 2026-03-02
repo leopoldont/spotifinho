@@ -61,3 +61,19 @@ Spotifinho Web é uma aplicação de streaming de música simples e auto-hospeda
 4.  **Acesse no navegador:**
     Abra seu navegador e acesse `http://127.0.0.1:5000`.
 
+## 🌐 Acessando de Outros Dispositivos (Serveo Tunneling)
+
+Para acessar sua aplicação Spotifinho rodando localmente a partir de outros dispositivos (como seu celular) através da internet, você pode usar o Serveo para criar um túnel:
+
+1.  **Certifique-se de que a aplicação está rodando:**
+    Sua aplicação Spotifinho deve estar ativa e acessível em `http://localhost:5000` (ou a porta configurada).
+
+2.  **Abra um novo terminal e crie o túnel:**
+    Execute o seguinte comando em um terminal separado do que está rodando a aplicação:
+    ```bash
+    ssh -R 80:localhost:5000 serveo.net
+    ```
+    O Serveo irá gerar uma URL pública temporária (ex: `https://<nome-aleatorio>.serveo.net`).
+
+3.  **Acesse a URL no seu dispositivo:**
+    Use a URL fornecida pelo Serveo no navegador do seu celular ou de outro dispositivo para acessar o Spotifinho.

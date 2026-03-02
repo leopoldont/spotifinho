@@ -20,6 +20,7 @@ def search():
             'quiet': True,
             'extract_flat': True, # Faster for search, doesn't download
             'force_generic_extractor': True,
+            'extractor_args': {'youtube': {'player_client': ['default']}},
         }
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             # Search for videos
@@ -68,6 +69,7 @@ def stream():
             'noplaylist': True,
             'quiet': True,
             'source_address': '0.0.0.0', # Attempt to force a source address
+            'extractor_args': {'youtube': {'player_client': ['default']}},
         }
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(f"https://www.youtube.com/watch?v={video_id}", download=False)
@@ -91,4 +93,6 @@ def stream():
 
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=False)
+
+
 
