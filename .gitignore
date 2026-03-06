@@ -1,3 +1,11 @@
 debug.txt
 instruções de deploy local.md
 instruções_de_trabalho.md
+memory/
+authtoken.txt
+*.rar
+temp_audio/
+.venv/
+__pycache__/
+*.pyc
+.env

@@ -55,12 +55,86 @@ document.addEventListener('DOMContentLoaded', () => {
     const audioPlayer = document.getElementById('audioPlayer');
     const playerInfo = document.getElementById('playerInfo');
     const currentTrackTitle = document.getElementById('currentTrackTitle');
+    const currentTrackThumbnail = document.getElementById('currentTrackThumbnail');
     const playerSpinner = document.getElementById('playerSpinner');
+
+    // Controls
+    const shuffleButton = document.getElementById('shuffleButton');
+    const repeatButton = document.getElementById('repeatButton');
+    const repeatBadge = document.getElementById('repeatBadge');
+    const sleepTimerButton = document.getElementById('sleepTimerButton');
+    const sleepTimerDisplay = document.getElementById('sleepTimerDisplay');
 
     let currentTrackDuration = 0;
 
+    // --- State ---
+    let isShuffle = false;
+    let repeatMode = 0; // 0: Off, 1: Repeat All, 2: Repeat One
+    let sleepTimerTimeout = null;
+    let sleepTimerMinutes = 0;
+
+    // --- Shuffle & Repeat ---
+    shuffleButton.addEventListener('click', () => {
+        isShuffle = !isShuffle;
+        shuffleButton.classList.toggle('active', isShuffle);
+        showToast(isShuffle ? 'Aleatório Ativado' : 'Aleatório Desativado');
+    });
+
+    repeatButton.addEventListener('click', () => {
+        repeatMode = (repeatMode + 1) % 3;
+        
+        if (repeatMode === 0) {
+            repeatButton.classList.remove('active');
+            repeatBadge.style.display = 'none';
+            repeatButton.title = 'Repetir: Desativado';
+            showToast('Repetição Desativada');
+        } else if (repeatMode === 1) {
+            repeatButton.classList.add('active');
+            repeatBadge.style.display = 'none';
+            repeatButton.title = 'Repetir: Tudo';
+            showToast('Repetindo Todas');
+        } else if (repeatMode === 2) {
+            repeatButton.classList.add('active');
+            repeatBadge.style.display = 'block';
+            repeatButton.title = 'Repetir: Uma';
+            showToast('Repetindo Esta Música');
+        }
+    });
+
+    // --- Sleep Timer ---
+    const sleepOptions = [0, 15, 30, 45, 60];
+    sleepTimerButton.addEventListener('click', () => {
+        const currentIndex = sleepOptions.indexOf(sleepTimerMinutes);
+        const nextIndex = (currentIndex + 1) % sleepOptions.length;
+        sleepTimerMinutes = sleepOptions[nextIndex];
+
+        if (sleepTimerTimeout) {
+            clearTimeout(sleepTimerTimeout);
+            sleepTimerTimeout = null;
+        }
+
+        if (sleepTimerMinutes > 0) {
+            sleepTimerDisplay.textContent = `${sleepTimerMinutes}m`;
+            sleepTimerButton.classList.add('active');
+            showToast(`Sleep Timer: ${sleepTimerMinutes} minutos`);
+
+            sleepTimerTimeout = setTimeout(() => {
+                audioPlayer.pause();
+                sleepTimerMinutes = 0;
+                sleepTimerDisplay.textContent = 'Off';
+                sleepTimerButton.classList.remove('active');
+                showToast('Tempo esgotado. Boa noite!');
+            }, sleepTimerMinutes * 60 * 1000);
+        } else {
+            sleepTimerDisplay.textContent = 'Off';
+            sleepTimerButton.classList.remove('active');
+            showToast('Sleep Timer Cancelado');
+        }
+    });
+
     // --- Queue ---
     let playQueue = [];
+    let playedTracks = []; // For history and proper shuffle backtracking if needed
 
     // --- Local Storage ---
     const getPlaylists = () => {
@@ -595,7 +669,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Player & Actions ---
+    let currentTrack = null;
+
     async function playSong(track) {
+        currentTrack = track;
         // Store the correct duration from the search metadata
         const durationParts = track.duration.split(':');
         if (durationParts.length === 2) {
@@ -652,9 +729,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         playerInfo.style.display = 'flex';
         currentTrackTitle.textContent = track.title;
+        
+        if (track.thumbnail) {
+            currentTrackThumbnail.src = track.thumbnail;
+            currentTrackThumbnail.style.display = 'block';
+        } else {
+            currentTrackThumbnail.style.display = 'none';
+        }
 
         if (listItemInSearch) listItemInSearch.classList.add('playing');
         if (listItemInLibrary) listItemInLibrary.classList.add('playing');
+        
+        // Add to played history
+        if (!playedTracks.some(t => t.id === track.id)) {
+            playedTracks.push(track);
+        }
     }
 
     function startPlayback(track) {
@@ -682,7 +771,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function preloadNextSongInQueue() {
         if (playQueue.length > 0) {
-            const nextTrack = playQueue[0]; // Peek at the next track
+            const nextIndex = isShuffle ? Math.floor(Math.random() * playQueue.length) : 0;
+            const nextTrack = playQueue[nextIndex]; // Peek at the next track
             if (nextTrack && !nextTrack.stream_url) { // Check if it doesn't have a URL already
                 console.log(`Pré-buscando URL para: ${nextTrack.title}`);
                 try {
@@ -739,17 +829,42 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     audioPlayer.addEventListener('ended', () => {
+        if (repeatMode === 2) { // Repeat One
+            playSong(currentTrack);
+            return;
+        }
+
         if (playQueue.length > 0) {
-            const nextTrack = playQueue.shift(); // Get the next track and remove it from the queue
+            let nextIndex = 0;
+            if (isShuffle) {
+                nextIndex = Math.floor(Math.random() * playQueue.length);
+            }
+            const nextTrack = playQueue.splice(nextIndex, 1)[0];
             playSong(nextTrack);
-            // The call to preloadNextSongInQueue() is now inside playSong(), so it's handled automatically.
+            
+            if (queueView.style.display === 'block') {
+                showQueue();
+            }
+        } else if (repeatMode === 1 && playedTracks.length > 0) { // Repeat All
+            playQueue = [...playedTracks];
+            // If shuffle, pick random, else start from beginning
+            let nextIndex = 0;
+            if (isShuffle) {
+                nextIndex = Math.floor(Math.random() * playQueue.length);
+            }
+            const nextTrack = playQueue.splice(nextIndex, 1)[0];
+            playSong(nextTrack);
+            
+            if (queueView.style.display === 'block') {
+                showQueue();
+            }
         } else {
             // Optional: Clear player UI when the queue is empty
             playerInfo.style.display = 'none';
-            currentTrackThumbnail.style.display = 'none';
             document.querySelectorAll('.results-list li, .library-items-list li').forEach(item => {
                 item.classList.remove('playing');
             });
+            currentTrack = null;
         }
     });
 

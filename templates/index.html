@@ -12,11 +12,18 @@
         <div class="player-container">
             <div id="playerSpinner" class="spinner" style="display: none;"></div>
             <div id="playerInfo" class="player-info" style="display: none;">
+                <img id="currentTrackThumbnail" src="" alt="" class="player-thumbnail" style="display: none;">
                 <div class="player-track-details">
                     <h3 id="currentTrackTitle"></h3>
                 </div>
             </div>
-            <audio class="audio-player" id="audioPlayer" controls></audio>
+            
+            <div class="player-controls">
+                <button id="shuffleButton" title="Ativar Aleatório"><i class="fas fa-random"></i></button>
+                <audio class="audio-player" id="audioPlayer" controls></audio>
+                <button id="repeatButton" title="Repetir: Desativado"><i class="fas fa-redo"></i><span id="repeatBadge" style="display: none;">1</span></button>
+                <button id="sleepTimerButton" title="Timer para Desligar"><i class="fas fa-moon"></i><span id="sleepTimerDisplay">Off</span></button>
+            </div>
         </div>
 
         <div id="searchView">
